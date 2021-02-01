@@ -8,8 +8,16 @@ import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.sensors.RomiGyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase
 {
@@ -23,8 +31,8 @@ public class Drivetrain extends SubsystemBase
 
     // The Romi has onboard encoders that are hardcoded
     // to use DIO pins 4/5 and 6/7 for the left and right
-    private final Encoder m_leftEncoder = new Encoder(4, 5);
-    private final Encoder m_rightEncoder = new Encoder(6, 7);
+    private final Encoder m_leftEncoder = new Encoder(Constants.leftMotorEncoder_ChannelA, Constants.leftMotorEncoder_ChannelB);
+    private final Encoder m_rightEncoder = new Encoder(Constants.rightMotorEncoder_ChannelA, Constants.rightMotorEncoder_ChannelB);
 
     // Set up the differential drive controller
     private final DifferentialDrive m_diffDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
@@ -35,6 +43,14 @@ public class Drivetrain extends SubsystemBase
     // Set up the BuiltInAccelerometer
     private final BuiltInAccelerometer m_accelerometer = new BuiltInAccelerometer();
 
+
+
+
+      // Odometry class for tracking robot pose
+  private final DifferentialDriveOdometry m_odometry;
+
+
+  
     /** Creates a new Drivetrain. */
     public Drivetrain() 
     {
@@ -42,12 +58,30 @@ public class Drivetrain extends SubsystemBase
         m_leftEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
         m_rightEncoder.setDistancePerPulse((Math.PI * kWheelDiameterInch) / kCountsPerRevolution);
         resetEncoders();
+
+        m_odometry = new DifferentialDriveOdometry(m_gyro.getRotation2d());
+
+        
     }
 
     public void arcadeDrive(double xaxisSpeed, double zaxisRotate) 
     {
         m_diffDrive.arcadeDrive(xaxisSpeed, zaxisRotate);
     }
+
+
+      /**
+   * Controls the left and right sides of the drive directly with voltages.
+   * @param leftVolts the commanded left output
+   * @param rightVolts the commanded right output
+   */
+  public void tankDriveVolts(double leftVolts, double rightVolts) {
+    m_leftMotor.setVoltage(leftVolts);
+    m_rightMotor.setVoltage(-rightVolts); // We invert this to maintain +ve = forward
+    m_diffDrive.feed();
+  }
+
+
 
     public void resetEncoders() 
     {
@@ -150,5 +184,68 @@ public class Drivetrain extends SubsystemBase
     public void periodic() 
     {
         // This method will be called once per scheduler run
+        m_odometry.update(m_gyro.getRotation2d(), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+    
     }
+
+
+
+
+
+
+    /**
+   * Returns the currently estimated pose of the robot.
+   * @return The pose
+   */
+  public Pose2d getPose() {
+    return m_odometry.getPoseMeters();
+  }
+
+  /**
+   * Returns the current wheel speeds of the robot.
+   * @return The current wheel speeds
+   */
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate());
+  }
+
+  /**
+   * Resets the odometry to the specified pose
+   * @param pose The pose to which to set the odometry
+   */
+  public void resetOdometry(Pose2d pose) {
+    resetEncoders();
+    m_odometry.resetPosition(pose, m_gyro.getRotation2d());
+  }
+
+  /**
+   * Sets the max output of the drive. Useful for scaling the drive to drive more slowly
+   * @param maxOutput The maximum output to which the drive will be constrained
+   */
+  public void setMaxOutput(double maxOutput) {
+    m_diffDrive.setMaxOutput(maxOutput);
+  }
+
+  /**
+   * Zeroes the heading of the robot
+   */
+  public void zeroHeading() {
+    m_gyro.reset();
+  }
+
+  /**
+   * Returns the heading of the robot
+   * @return The robot's heading in degrees, from -180 to 180
+   */
+  public double getHeading() {
+    return m_gyro.getRotation2d().getDegrees();
+  }
+
+  /**
+   * Returns the turn rate of the robot
+   * @return The turn rate of the robot, in degrees per second
+   */
+  public double getTurnRate() {
+    return -m_gyro.getRate();
+  }
 }

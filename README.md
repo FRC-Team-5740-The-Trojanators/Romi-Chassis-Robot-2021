@@ -1,5 +1,8 @@
 The Romi Chassis project for Team 5740 Java development learning.
 
+## Assembling the Romi Kit  
+Follow the instructions here for using the Romi kit: https://docs.wpilib.org/en/stable/docs/romi-robot/hardware.html
+
 ## Configuring the Pi
 Following these instructions here:
 https://docs.wpilib.org/en/stable/docs/romi-robot/imaging-romi.html
