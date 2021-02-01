@@ -57,7 +57,7 @@ public class DriveDistance extends CommandBase
     {
         // Compare distance travelled from start to desired distance
         // return Math.abs(m_drive.getAverageDistanceInch()) >= m_distance;
-        return Math.abs(m_drive.getAverageDistanceInch()) >= m_distance;
+        return Math.abs(m_drive.getAverageDistanceMeter()) >= m_distance;
 
     }
 }
