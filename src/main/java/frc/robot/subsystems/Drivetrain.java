@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.robot.sensors.RomiGyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +25,8 @@ public class Drivetrain extends SubsystemBase {
   // to use DIO pins 4/5 and 6/7 for the left and right
   private final Encoder m_leftEncoder = new Encoder(4, 5);
   private final Encoder m_rightEncoder = new Encoder(6, 7);
+
+  
 
   // Set up the differential drive controller
   private final DifferentialDrive m_diffDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
@@ -69,6 +72,10 @@ public class Drivetrain extends SubsystemBase {
 
   public double getAverageDistanceInch() {
     return (getLeftDistanceInch() + getRightDistanceInch()) / 2.0;
+  }
+
+  public RomiGyro getGryoScope(){
+    return m_gyro;
   }
 
   /**
@@ -128,6 +135,19 @@ public class Drivetrain extends SubsystemBase {
   /** Reset the gyro. */
   public void resetGyro() {
     m_gyro.reset();
+  }
+
+  public Encoder getRightEncoder(){
+    return m_rightEncoder;
+  }
+
+
+  public Encoder getLeftEncoder(){
+    return m_leftEncoder;
+  }  
+
+  public BuiltInAccelerometer getAccelerometer(){
+    return m_accelerometer;
   }
 
   @Override
