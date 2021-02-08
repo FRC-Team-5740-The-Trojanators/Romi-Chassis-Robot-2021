@@ -130,6 +130,15 @@ public class Drivetrain extends SubsystemBase {
     m_gyro.reset();
   }
 
+  public Encoder getRightEncoder(){
+    return m_rightEncoder;
+  }
+
+
+  public Encoder getLeftEncoder(){
+    return m_leftEncoder;
+  }  
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
